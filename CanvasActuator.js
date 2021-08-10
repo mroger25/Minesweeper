@@ -1,44 +1,68 @@
 export class CanvasActuator {
-  constructor(id, w, h, color) {
-    this.id = document.createElement("canvas");
-    this.id.setAttribute("id", id);
-    document.body.appendChild(this.id);
-    this.ctx = this.id.getContext("2d");
+  constructor(w, h) {
+    this.canvas = document.createElement("canvas");
     this.events = {};
-    this.setup(w, h, color);
+    this.start(w, h);
   }
 
-  setup(w, h, color) {
-    this.width = w;
-    this.height = h;
-    this.id.width = w;
-    this.id.height = h;
-    this.id.style.background = color;
+  start(w, h) {
+    this.canvas.width = w;
+    this.canvas.height = h;
+    this.ctx = this.canvas.getContext("2d");
+    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+    this.render();
+    this.click();
   }
 
-  rect(x, y, w, h, color, stroke) {
+  emit(e, t) {
+    const i = this.events[e];
+    if (i) {
+      i.forEach((e) => {
+        e(t);
+      });
+    }
+  }
+
+  on(e, t) {
+    if (this.events[e]) {
+      this.events[e].push(t);
+    } else {
+      this.events[e] = [];
+      this.events[e].push(t);
+    }
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.w, this.canvas.h);
+  }
+
+  fillRect(x, y, w, h, color) {
     this.ctx.fillStyle = color;
-    this.ctx.strokeStyle = stroke;
+    this.ctx.fillRect(x, y, w, h);
+  }
+
+  rect(x, y, w, h) {
     this.ctx.beginPath();
     this.ctx.rect(x, y, w, h);
     this.ctx.stroke();
   }
 
-  arc(x, y, r, stroke) {
-    this.ctx.strokeStyle = stroke;
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, r / 2, 0, 2 * Math.PI);
-    this.ctx.stroke();
+  arc(x, y, d) {
+    this.ctx.arc(x, y, d / 2, 0, 2 * Math.PI);
   }
 
-  render(e, t) {
-    if (!this.events[e]) {
-      this.events[e] = t;
-    }
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    this.events[e]();
+  click() {
+    this.canvas.addEventListener("click", (e) => {
+      const n = { x: e.layerX, y: e.layerY };
+      this.emit("click", n);
+    });
+  }
+
+  render() {
+    this.clear();
+    this.emit("draw");
     requestAnimationFrame(() => {
-      this.render(e, t);
+      this.render();
     });
   }
 }
