@@ -36,21 +36,6 @@ export class CanvasActuator {
     this.ctx.clearRect(0, 0, this.canvas.w, this.canvas.h);
   }
 
-  fillRect(x, y, w, h, color) {
-    this.ctx.fillStyle = color;
-    this.ctx.fillRect(x, y, w, h);
-  }
-
-  rect(x, y, w, h) {
-    this.ctx.beginPath();
-    this.ctx.rect(x, y, w, h);
-    this.ctx.stroke();
-  }
-
-  arc(x, y, d) {
-    this.ctx.arc(x, y, d / 2, 0, 2 * Math.PI);
-  }
-
   click() {
     this.canvas.addEventListener("click", (e) => {
       const n = { x: e.layerX, y: e.layerY };
